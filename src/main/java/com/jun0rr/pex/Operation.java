@@ -50,7 +50,7 @@ public class Operation implements Expression {
   
   @Override
   public boolean isPartialToken(String s) {
-    return token.contains(s);
+    return token.startsWith(s);
   }
   
   @Override

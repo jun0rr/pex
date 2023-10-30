@@ -4,6 +4,7 @@
  */
 package com.jun0rr.pex;
 
+import com.jun0rr.pex.StateEngine.State;
 import com.jun0rr.pex.ops.Ceil;
 import com.jun0rr.pex.ops.Divide;
 import com.jun0rr.pex.ops.Equals;
@@ -27,8 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -38,13 +37,13 @@ public class Parser {
   
   public static final int BRACKET_PRIORITY = 15000;
   
-  public static final Predicate<String> VALUE_PART = Pattern.compile("[0-9.]").asMatchPredicate();
-  
   private final Map<Integer,Expression> stack;
   
   private final Map<String,Expression> variables;
   
   private final List<Operation> ops;
+  
+  private final StateEngine engine;
   
   public Parser() {
     stack = new TreeMap();
@@ -68,6 +67,7 @@ public class Parser {
     ops.add(new Min());
     ops.add(new Random());
     ops.add(new Round());
+    engine = new StateEngine(ops);
   }
   
   public Parser addOperation(Operation o) {
@@ -93,62 +93,36 @@ public class Parser {
     return this;
   }
   
-  public boolean isValuePart(String s) {
-    return VALUE_PART.test(s);
-  }
-  
-  public boolean isOperationPart(String s) {
-    return ops.stream().anyMatch(o->o.isPartialToken(s));
-  }
-  
-  public boolean isVariablePart(String s) {
-    return variables.keySet().stream().anyMatch(v->v.contains(s));
-  }
-  
-  public boolean isValuePart(char c) {
-    return isValuePart(String.valueOf(c));
-  }
-  
-  public boolean isOperationPart(char c) {
-    return isOperationPart(String.valueOf(c));
-  }
-  
-  public boolean isVariablePart(char c) {
-    return isVariablePart(String.valueOf(c));
-  }
-  
-  public boolean isOpenBracket(char c) {
-    return '(' == c;
-  }
-  
-  public boolean isCloseBracket(char c) {
-    return ')' == c;
-  }
-  
-  public boolean isBlank(char c) {
-    return ' ' == c;
-  }
-  
-  public void parseStack(String s) {
+  public void parse(String s) {
     //(5-3)*2-2
     //1+1
     stack.clear();
+    engine.clear();
     int priority = 0;
-    boolean isvalue = false;
-    StringBuilder sb = new StringBuilder();
+    int increase = 0;
     for(int i = 0; i < s.length(); i++) {
-      char c = s.charAt(i);
-      boolean transition = isvalue != isValuePart(c);
-      transition = transition || isOpenBracket(c);
-      tr
-      if(isOpenBracket(c)) {
-        priority += BRACKET_PRIORITY;
+      engine.update(s.charAt(i));
+      if(State.BRACKET_OPEN == engine.newState()) {
+        increase = BRACKET_PRIORITY;
+        priority += increase;
       }
-      else if(isCloseBracket(c)) {
-        priority -= BRACKET_PRIORITY;
+      else if(State.BRACKET_CLOSE == engine.newState()) {
+        priority -= increase;
+        increase = 0;
       }
-      if(!isBlank(c) && !isOpenBracket(c) && !isCloseBracket(c)) {
-        sb.append(c);
+      if(engine.isStateChanged()) {
+        switch(engine.state()) {
+          case VALUE:
+            priority++;
+            stack.put(priority, Value.of(engine.value()));
+            break;
+          case OPERATION:
+            Operation op = ops.stream()
+                .filter(o->o.token().equalsIgnoreCase(engine.value()))
+                .findFirst().get();
+            increase = op.priority();
+            priority += increase;
+        }
       }
     }
   }

@@ -32,6 +32,10 @@ public class Value implements Expression {
     return new Value(d);
   }
   
+  public static Value of(String d) {
+    return new Value(Double.parseDouble(d));
+  }
+  
   @Override
   public int priority() {
     return priority;
