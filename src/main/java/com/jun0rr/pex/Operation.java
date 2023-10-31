@@ -36,6 +36,21 @@ public class Operation implements Expression {
     this.priority = priority;
     this.arity = arity;
   }
+
+  @Override
+  public boolean isValue() {
+    return false;
+  }
+
+  @Override
+  public boolean isOperation() {
+    return true;
+  }
+
+  @Override
+  public boolean isVariable() {
+    return false;
+  }
   
   @Override
   public int priority() {

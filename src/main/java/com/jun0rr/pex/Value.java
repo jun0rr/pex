@@ -37,6 +37,21 @@ public class Value implements Expression {
   }
   
   @Override
+  public boolean isValue() {
+    return true;
+  }
+
+  @Override
+  public boolean isOperation() {
+    return false;
+  }
+
+  @Override
+  public boolean isVariable() {
+    return false;
+  }
+  
+  @Override
   public int priority() {
     return priority;
   }

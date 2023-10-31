@@ -21,6 +21,12 @@ public interface Expression extends Comparable<Expression> {
     return Integer.compare(priority(), e.priority());
   }
   
+  public boolean isValue();
+  
+  public boolean isOperation();
+  
+  public boolean isVariable();
+  
   public int arity();
   
   public PlaceParam placeParam();

@@ -30,6 +30,21 @@ public class Variable implements Expression {
   }
   
   @Override
+  public boolean isValue() {
+    return false;
+  }
+
+  @Override
+  public boolean isOperation() {
+    return false;
+  }
+
+  @Override
+  public boolean isVariable() {
+    return true;
+  }
+  
+  @Override
   public int priority() {
     return priority;
   }

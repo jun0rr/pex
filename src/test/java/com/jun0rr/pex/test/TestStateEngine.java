@@ -62,7 +62,7 @@ public class TestStateEngine {
   
   
   @Test public void test() {
-    StateEngine eng = new StateEngine(ops, new HashMap<>());
+    StateEngine eng = new StateEngine(ops);
     String sx = "10+10 - max 1 5 * x";
     for(int i = 0; i < sx.length(); i++) {
       eng.update(sx.charAt(i));
