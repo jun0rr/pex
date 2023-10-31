@@ -39,6 +39,8 @@ public class Parser {
   
   private final Map<Integer,Expression> stack;
   
+  private final List<Expression> prestack;
+  
   private final Map<String,Expression> variables;
   
   private final List<Operation> ops;
@@ -48,6 +50,7 @@ public class Parser {
   public Parser() {
     stack = new TreeMap();
     variables = new TreeMap();
+    prestack = new LinkedList<>();
     ops = new LinkedList();
     ops.add(new Sum());
     ops.add(new Subtract());
@@ -99,29 +102,33 @@ public class Parser {
     stack.clear();
     engine.clear();
     int priority = 0;
-    int increase = 0;
     for(int i = 0; i < s.length(); i++) {
       engine.update(s.charAt(i));
       if(State.BRACKET_OPEN == engine.newState()) {
-        increase = BRACKET_PRIORITY;
-        priority += increase;
+        priority += BRACKET_PRIORITY;
       }
       else if(State.BRACKET_CLOSE == engine.newState()) {
-        priority -= increase;
-        increase = 0;
+        priority -= BRACKET_PRIORITY;
       }
       if(engine.isStateChanged()) {
         switch(engine.state()) {
           case VALUE:
             priority++;
-            stack.put(priority, Value.of(engine.value()));
+            prestack.add(Value.of(engine.value()).priority(priority));
             break;
           case OPERATION:
             Operation op = ops.stream()
                 .filter(o->o.token().equalsIgnoreCase(engine.value()))
                 .findFirst().get();
-            increase = op.priority();
-            priority += increase;
+            op.priority(op.priority() + priority);
+            prestack.add(op);
+            break;
+          case VARIABLE:
+            priority++;
+            Variable v = new Variable(engine.value(), variables);
+            v.priority(priority);
+            prestack.add(v);
+            break;
         }
       }
     }
