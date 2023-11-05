@@ -19,6 +19,8 @@ public class Value implements Expression {
   
   public static final int PRIORITY = 10;
   
+  public static final Value NaN = of(Double.NaN);
+  
   private final double value;
   
   private int priority;
@@ -56,6 +58,18 @@ public class Value implements Expression {
     return priority;
   }
 
+  @Override
+  public Expression addPriority(int amount) {
+    priority += amount;
+    return this;
+  }
+  
+  @Override
+  public Expression subPriority(int amount) {
+    priority -= amount;
+    return this;
+  }
+  
   @Override
   public List<Expression> params() {
     return Collections.EMPTY_LIST;

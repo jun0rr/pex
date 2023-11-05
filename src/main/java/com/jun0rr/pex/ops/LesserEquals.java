@@ -12,19 +12,22 @@ import com.jun0rr.pex.Operation;
  */
 public class LesserEquals extends Operation {
   
-  public static final int PRIORITY = 5000;
+  public static final int PRIORITY = 7000;
   
   public LesserEquals() {
-    super("<=", PRIORITY, PlaceParam.BOTH, 2, p->{
-      double a = p.get(0).resolve();
-      double b = p.get(1).resolve();
+    super("<=", PRIORITY, PlaceParam.BOTH, 2, e->{
+      double a = e.params().get(0).resolve();
+      double b = e.params().get(1).resolve();
       return a <= b ? 1.0 : 0.0;
     });
   }
 
   @Override
   public String toString() {
-    return String.format("( %s <= %s )", params().get(0), params().get(1));
+    String fmt = "( %s <= %s )";
+    String a = params().size() > 0 ? params().get(0).toString() : "?";
+    String b = params().size() > 1 ? params().get(1).toString() : "?";
+    return String.format(fmt, a, b);
   }
   
 }

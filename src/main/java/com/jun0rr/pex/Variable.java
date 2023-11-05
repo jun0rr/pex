@@ -56,6 +56,18 @@ public class Variable implements Expression {
   }
 
   @Override
+  public Expression addPriority(int amount) {
+    priority += amount;
+    return this;
+  }
+  
+  @Override
+  public Expression subPriority(int amount) {
+    priority -= amount;
+    return this;
+  }
+  
+  @Override
   public int arity() {
     return 1;
   }
@@ -63,6 +75,10 @@ public class Variable implements Expression {
   @Override
   public PlaceParam placeParam() {
     return PlaceParam.RIGHT;
+  }
+  
+  public Map<String,Expression> variables() {
+    return variables;
   }
 
   @Override

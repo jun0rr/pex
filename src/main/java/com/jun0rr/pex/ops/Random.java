@@ -15,15 +15,23 @@ public class Random extends Operation {
   public static final int PRIORITY = 7000;
   
   public Random() {
-    super("rdm", PRIORITY, PlaceParam.NONE, 1, p->{
-      double a = p.get(0).resolve();
+    super("rdm", PRIORITY, PlaceParam.NONE, 1, e->{
+      double a = e.params().get(0).resolve();
       return Math.random() * a;
     });
   }
 
   @Override
   public String toString() {
-    return String.format("rdm( %s )", params().get(0));
+    StringBuilder str = new StringBuilder("rdm( ");
+    for(int i = 0; i < params().size(); i++) {
+      str.append(params().get(i)).append(", ");
+    }
+    if(str.toString().endsWith(", ")) {
+      str.delete(str.length() -2, str.length());
+    }
+    str.append(")");
+    return str.toString();
   }
   
 }

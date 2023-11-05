@@ -4,7 +4,7 @@
  */
 package com.jun0rr.pex;
 
-import com.jun0rr.pex.StateEngine.State;
+import com.jun0rr.indexed.Indexed;
 import com.jun0rr.pex.ops.Ceil;
 import com.jun0rr.pex.ops.Divide;
 import com.jun0rr.pex.ops.Equals;
@@ -14,6 +14,7 @@ import com.jun0rr.pex.ops.GreaterEquals;
 import com.jun0rr.pex.ops.Lesser;
 import com.jun0rr.pex.ops.LesserEquals;
 import com.jun0rr.pex.ops.Max;
+import com.jun0rr.pex.ops.Attr;
 import com.jun0rr.pex.ops.Min;
 import com.jun0rr.pex.ops.Mod;
 import com.jun0rr.pex.ops.Multiply;
@@ -67,6 +68,7 @@ public class Parser {
     ops.add(new Lesser());
     ops.add(new LesserEquals());
     ops.add(new Max());
+    ops.add(new Attr(variables));
     ops.add(new Min());
     ops.add(new Random());
     ops.add(new Round());
@@ -96,42 +98,104 @@ public class Parser {
     return this;
   }
   
-  public void parse(String s) {
-    //(5-3)*2-2
-    //1+1
-    stack.clear();
+  private int descPriority(Indexed<Expression> a, Indexed<Expression> b) {
+    return ascPriority(a, b) * -1;
+  }
+  
+  private int ascPriority(Indexed<Expression> a, Indexed<Expression> b) {
+    return Integer.compare(a.value().priority(), b.value().priority());
+  }
+  
+  private int prevValidExp(int index) {
+    System.out.printf("[DEBUG] prevValidExp( %d ):%n", index);
+    for(int i = index-1; i >= 0; i--) {
+      Expression e = prestack.get(i);
+      System.out.printf("[DEBUG]   - %d: %s%n", i, e);
+      if(e != Value.NaN) {
+        return i;
+      }
+    }
+    return -1;
+  }
+  
+  private int nextValidExp(int index) {
+    System.out.printf("[DEBUG] nextValidExp( %d ):%n", index);
+    for(int i = index+1; i < prestack.size(); i++) {
+      Expression e = prestack.get(i);
+      System.out.printf("[DEBUG]   - %d: %s%n", i, e);
+      if(e != Value.NaN) {
+        return i;
+      }
+    }
+    return -1;
+  }
+  
+  public Expression parse(String s) {
+    prestack.clear();
     engine.clear();
-    int priority = 0;
     for(int i = 0; i < s.length(); i++) {
       engine.update(s.charAt(i));
-      if(State.BRACKET_OPEN == engine.newState()) {
-        priority += BRACKET_PRIORITY;
+      if(i == s.length() -1) {
+        engine.finish();
       }
-      else if(State.BRACKET_CLOSE == engine.newState()) {
-        priority -= BRACKET_PRIORITY;
-      }
+      System.out.println("[DEBUG] " + engine);
       if(engine.isStateChanged()) {
+        System.out.printf("[DEBUG] state=%s, value=%s, priority=%s%n", engine.state(), engine.value(), engine.priority());
         switch(engine.state()) {
           case VALUE:
-            priority++;
-            prestack.add(Value.of(engine.value()).priority(priority));
+            prestack.add(Value.of(engine.value())
+                .priority(engine.priority()));
             break;
           case OPERATION:
             Operation op = ops.stream()
                 .filter(o->o.token().equalsIgnoreCase(engine.value()))
                 .findFirst().get();
-            op.priority(op.priority() + priority);
+            op.addPriority(engine.priority());
             prestack.add(op);
             break;
           case VARIABLE:
-            priority++;
-            Variable v = new Variable(engine.value(), variables);
-            v.priority(priority);
-            prestack.add(v);
+            prestack.add(new Variable(engine.value(), variables)
+                .priority(engine.priority()));
             break;
+          default: break;
         }
       }
     }
+    System.out.println("[INFO] * Prestack:");
+    prestack.forEach(e->System.out.println("[INFO]  - " + e));
+    //System.out.println("Operations:");
+    List<Indexed<Expression>> resolve = prestack.stream()
+        .map(Indexed.indexed())
+        .filter(i->i.value().isOperation())
+        .filter(i->i.value().arity() > 0)
+        .sorted(this::descPriority)
+        //.peek(i->System.out.println("  - " + i))
+        .toList();
+    for(Indexed<Expression> i : resolve) {
+      Expression e = i.value();
+      for(int j = 0; j < e.arity(); j++) {
+        int idx = 0;
+        switch(e.placeParam()) {
+          case LEFT:
+          case BOTH:
+            if(j == 0) {
+              idx = prevValidExp(i.index());
+            }
+            else {
+              idx = nextValidExp(i.index());
+            }
+            break;
+          case RIGHT:
+            idx = nextValidExp(i.index());
+            break;
+          default: break;
+        }
+        e.addParam(prestack.get(idx));
+        prestack.set(idx, Value.NaN);
+        System.out.println("[INFO] * Eval: " + i);
+      }
+    }
+    return prestack.get(nextValidExp(-1));
   }
   
 }

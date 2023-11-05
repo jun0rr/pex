@@ -24,7 +24,6 @@ import com.jun0rr.pex.ops.Round;
 import com.jun0rr.pex.ops.SquareRoot;
 import com.jun0rr.pex.ops.Subtract;
 import com.jun0rr.pex.ops.Sum;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -63,17 +62,17 @@ public class TestStateEngine {
   
   @Test public void test() {
     StateEngine eng = new StateEngine(ops);
-    String sx = "10+10 - max 1 5 * x";
+    String sx = "(10+10 - max 1 5) * xyz";
     for(int i = 0; i < sx.length(); i++) {
       eng.update(sx.charAt(i));
-      //System.out.printf("-> %s%n", eng.toString());
+      System.out.printf("  -> %s%n", eng.toString());
       if(eng.isStateChanged()) {
-        System.out.printf(">>> state=%s, value=%s%n", eng.state(), eng.value());
+        System.out.printf(">>> state=%s, value=%s, priority=%d%n", eng.state(), eng.value(), eng.priority());
       }
     }
     eng.finish();
     if(eng.isStateChanged()) {
-      System.out.printf(">>> state=%s, value=%s%n", eng.state(), eng.value());
+      System.out.printf(">>> state=%s, value=%s, priority=%d%n", eng.state(), eng.value(), eng.priority());
     }
   }
   

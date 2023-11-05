@@ -15,15 +15,23 @@ public class Ceil extends Operation {
   public static final int PRIORITY = 7000;
   
   public Ceil() {
-    super("ceil", PRIORITY, PlaceParam.RIGHT, 1, p->{
-      double a = p.get(0).resolve();
+    super("ceil", PRIORITY, PlaceParam.RIGHT, 1, e->{
+      double a = e.params().get(0).resolve();
       return Math.floor(a);
     });
   }
 
   @Override
   public String toString() {
-    return String.format("ceil( %s )", params().get(0));
+    StringBuilder str = new StringBuilder("ceil( ");
+    for(int i = 0; i < params().size(); i++) {
+      str.append(params().get(i)).append(", ");
+    }
+    if(str.toString().endsWith(", ")) {
+      str.delete(str.length() -2, str.length());
+    }
+    str.append(")");
+    return str.toString();
   }
   
 }

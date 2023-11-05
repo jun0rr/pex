@@ -24,11 +24,11 @@ public class Operation implements Expression {
   
   private PlaceParam placeparam;
   
-  private final Function<List<Expression>,Double> function;
+  private final Function<Expression,Double> function;
   
   private int priority;
   
-  public Operation(String token, int priority, PlaceParam pp, int arity, Function<List<Expression>,Double> fn) {
+  public Operation(String token, int priority, PlaceParam pp, int arity, Function<Expression,Double> fn) {
     this.token = Objects.requireNonNull(token);
     this.function = Objects.requireNonNull(fn);
     this.placeparam = Objects.requireNonNull(pp);
@@ -64,6 +64,18 @@ public class Operation implements Expression {
   }
   
   @Override
+  public Expression addPriority(int amount) {
+    priority += amount;
+    return this;
+  }
+  
+  @Override
+  public Expression subPriority(int amount) {
+    priority -= amount;
+    return this;
+  }
+  
+  @Override
   public boolean isPartialToken(String s) {
     return token.startsWith(s);
   }
@@ -75,7 +87,7 @@ public class Operation implements Expression {
   
   @Override
   public double resolve() {
-    return function.apply(params);
+    return function.apply(this);
   }
 
   @Override

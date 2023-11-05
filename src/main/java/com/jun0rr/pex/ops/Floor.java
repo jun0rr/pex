@@ -15,15 +15,23 @@ public class Floor extends Operation {
   public static final int PRIORITY = 7000;
   
   public Floor() {
-    super("floor", PRIORITY, PlaceParam.RIGHT, 1, p->{
-      double a = p.get(0).resolve();
+    super("floor", PRIORITY, PlaceParam.RIGHT, 1, e->{
+      double a = e.params().get(0).resolve();
       return Math.floor(a);
     });
   }
 
   @Override
   public String toString() {
-    return String.format("floor( %s )", params().get(0));
+    StringBuilder str = new StringBuilder("floor( ");
+    for(int i = 0; i < params().size(); i++) {
+      str.append(params().get(i)).append(", ");
+    }
+    if(str.toString().endsWith(", ")) {
+      str.delete(str.length() -2, str.length());
+    }
+    str.append(")");
+    return str.toString();
   }
   
 }

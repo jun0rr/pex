@@ -15,9 +15,9 @@ public class Round extends Operation {
   public static final int PRIORITY = 7000;
   
   public Round() {
-    super("round", PRIORITY, PlaceParam.RIGHT, 2, p->{
-      double a = p.get(0).resolve();
-      double b = p.get(1).resolve();
+    super("round", PRIORITY, PlaceParam.RIGHT, 2, e->{
+      double a = e.params().get(0).resolve();
+      double b = e.params().get(1).resolve();
       double c = Math.pow(10, b);
       long lv = (long) (a * c);
       double dv = a * c;
@@ -27,7 +27,15 @@ public class Round extends Operation {
 
   @Override
   public String toString() {
-    return String.format("round( %s, %s )", params().get(0), params().get(1));
+    StringBuilder str = new StringBuilder("round( ");
+    for(int i = 0; i < params().size(); i++) {
+      str.append(params().get(i)).append(", ");
+    }
+    if(str.toString().endsWith(", ")) {
+      str.delete(str.length() -2, str.length());
+    }
+    str.append(")");
+    return str.toString();
   }
   
 }

@@ -16,6 +16,10 @@ public interface Expression extends Comparable<Expression> {
   
   public Expression priority(int p);
   
+  public Expression addPriority(int amount);
+  
+  public Expression subPriority(int amount);
+  
   @Override
   public default int compareTo(Expression e) {
     return Integer.compare(priority(), e.priority());

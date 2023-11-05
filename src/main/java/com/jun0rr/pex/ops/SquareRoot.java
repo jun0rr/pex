@@ -15,15 +15,23 @@ public class SquareRoot extends Operation {
   public static final int PRIORITY = 7000;
   
   public SquareRoot() {
-    super("sqrt", PRIORITY, PlaceParam.RIGHT, 1, p->{
-      double a = p.get(0).resolve();
+    super("sqrt", PRIORITY, PlaceParam.RIGHT, 1, e->{
+      double a = e.params().get(0).resolve();
       return Math.sqrt(a);
     });
   }
 
   @Override
   public String toString() {
-    return String.format("sqrt( %s )", params().get(0));
+    StringBuilder str = new StringBuilder("sqrt( ");
+    for(int i = 0; i < params().size(); i++) {
+      str.append(params().get(i)).append(", ");
+    }
+    if(str.toString().endsWith(", ")) {
+      str.delete(str.length() -2, str.length());
+    }
+    str.append(")");
+    return str.toString();
   }
   
 }
