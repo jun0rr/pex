@@ -22,12 +22,4 @@ public class LesserEquals extends Operation {
     });
   }
 
-  @Override
-  public String toString() {
-    String fmt = "( %s <= %s )";
-    String a = params().size() > 0 ? params().get(0).toString() : "?";
-    String b = params().size() > 1 ? params().get(1).toString() : "?";
-    return String.format(fmt, a, b);
-  }
-  
 }

@@ -30,15 +30,23 @@ public class Main {
       try {
         System.out.printf("[JPex]> ");
         String line = scanner.nextLine();
-        System.out.printf(">>> line=%s%n", line);
         switch(line) {
           case "vars":
-            System.out.printf("[JPex]> Variables(%d)%n", parser.variables().size());
-            parser.variables().forEach((k,v)->System.out.printf("[JPex]>   %s = %s%n", k, v));
+            System.out.printf("%s%n", StringPad.of(String.format("[ Variables: %d ]", parser.variables().size())).cpad("=", 74));
+            System.out.printf("  %s %s%n", StringPad.of("Name").rpad(" ", 9), StringPad.of("Value").lpad(" ", 60));
+            System.out.printf("  %s %s%n", StringPad.of("-").rpad("-", 9), StringPad.of("-").lpad("-", 60));
+            parser.variables().entrySet().stream()
+                .peek(e->System.out.printf("  %s", StringPad.of(e.getKey().concat(" ")).rpad("_", 10)))
+                .forEach(e->System.out.printf("%s%n", StringPad.of(String.format(" %s", e.getValue())).lpad("_", 60)));
+            System.out.printf("%s%n", StringPad.of(String.format("=", parser.variables().size())).cpad("=", 74));
             break;
           case "exit":
             System.out.printf("[JPex]> bye!%n");
             System.exit(0);
+            break;
+          case "stack":
+            parser.setShowStack(!parser.isShowStack());
+            System.out.printf("[JPex]> set show stack: %s%n", parser.isShowStack());
             break;
           default:
             Expression e = parser.parse(line);

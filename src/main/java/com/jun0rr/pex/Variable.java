@@ -110,7 +110,7 @@ public class Variable implements Expression {
   public double resolve() {
     Expression val = variables.get(name);
     if(val == null) {
-      throw new IllegalStateException(String.format("Value not found (%s = ?)", name));
+      throw new IllegalStateException(String.format("Variable value not found (%s = ?)", name));
     }
     return val.resolve();
   }

@@ -6,7 +6,7 @@ package com.jun0rr.pex.ops;
 
 import com.jun0rr.pex.Expression;
 import com.jun0rr.pex.Operation;
-import com.jun0rr.pex.Variable;
+import com.jun0rr.pex.Value;
 import java.util.Map;
 import java.util.Objects;
 
@@ -23,14 +23,18 @@ public class Attr extends Operation {
   public Attr(Map<String,Expression> vars) {
     super("=", PRIORITY, PlaceParam.BOTH, 2, e->{
       Attr attr = (Attr) e;
-      System.out.println("-- " + attr + " -- " + attr.hashCode());
       Expression name = attr.params().get(0);
-      Expression value = attr.variables.get(name.token());
-      if(value == null) {
+      Expression value;
+      if(attr.params().size() > 1) {
         value = attr.params().get(1);
       }
+      else if(attr.variables.containsKey(name.token())) {
+        value = attr.variables.get(name.token());
+      }
+      else {
+        value = Value.of(0);
+      }
       attr.variables.put(name.token(), value);
-      System.out.printf("[DEBUG] Attr: name=%s, value=%s%n", name, value);
       return value.resolve();
     });
     this.variables = Objects.requireNonNull(vars);
@@ -39,18 +43,6 @@ public class Attr extends Operation {
   @Override
   public Attr clone() {
     return new Attr(variables);
-  }
-
-  @Override
-  public String toString() {
-    String fmt = "( %s = %s )";
-    String name = params().size() > 0 ? params().get(0).token() : "?";
-    Expression e = variables.get(name);
-    if(e == null && params().size() > 1) {
-      e = params().get(1);
-    }
-    String value = e != null ? e.toString() : "?";
-    return String.format(fmt, name, value);
   }
   
 }

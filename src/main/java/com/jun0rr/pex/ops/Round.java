@@ -25,17 +25,4 @@ public class Round extends Operation {
     });
   }
 
-  @Override
-  public String toString() {
-    StringBuilder str = new StringBuilder("round( ");
-    for(int i = 0; i < params().size(); i++) {
-      str.append(params().get(i)).append(", ");
-    }
-    if(str.toString().endsWith(", ")) {
-      str.delete(str.length() -2, str.length() -1);
-    }
-    str.append(")");
-    return str.toString();
-  }
-  
 }

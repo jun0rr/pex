@@ -4,7 +4,6 @@
  */
 package com.jun0rr.pex;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -14,7 +13,7 @@ import java.util.function.Function;
  *
  * @author F6036477
  */
-public class Operation implements Expression {
+public class Operation implements Expression, Cloneable {
   
   private final List<Expression> params;
   
@@ -42,15 +41,9 @@ public class Operation implements Expression {
   
   @Override
   public Operation clone() {
-    return new Operation(token, priority, placeparam, arity, function);
+    return new Operation(token, initPriority, placeparam, arity, function);
   }
   
-  public Operation reset() {
-    params.clear();
-    priority = initPriority;
-    return this;
-  }
-
   @Override
   public boolean isValue() {
     return false;
@@ -130,6 +123,78 @@ public class Operation implements Expression {
   public Expression addParam(Expression e) {
     params.add(Objects.requireNonNull(e));
     return this;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 3;
+    hash = 53 * hash + Objects.hashCode(this.params);
+    hash = 53 * hash + Objects.hashCode(this.token);
+    hash = 53 * hash + this.arity;
+    hash = 53 * hash + Objects.hashCode(this.placeparam);
+    hash = 53 * hash + this.initPriority;
+    hash = 53 * hash + this.priority;
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final Operation other = (Operation) obj;
+    if (this.arity != other.arity) {
+      return false;
+    }
+    if (this.initPriority != other.initPriority) {
+      return false;
+    }
+    if (this.priority != other.priority) {
+      return false;
+    }
+    if (!Objects.equals(this.token, other.token)) {
+      return false;
+    }
+    if (!Objects.equals(this.params, other.params)) {
+      return false;
+    }
+    return this.placeparam == other.placeparam;
+  }
+  
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder("( ");
+    switch(placeparam) {
+      case BOTH:
+        sb.append(params().size() > 0 ? params().get(0).toString() : "?");
+        sb.append(" ").append(token).append(" ");
+        for(int i = 1; i < arity; i++) {
+          sb.append(params.size() > i ? params.get(i).toString() : "?")
+              .append(" ");
+        }
+        return sb.append(")").toString();
+      case LEFT:
+        for(int i = 0; i < arity; i++) {
+          sb.append(params.size() > i ? params.get(i).toString() : "?")
+              .append(" ");
+        }
+        return sb.append(token).append(" )").toString();
+      case NONE:
+        return sb.append(token).append(" )").toString();
+      default:
+        sb.append(token).append(" ");
+        for(int i = 0; i < arity; i++) {
+          sb.append(params.size() > i ? params.get(i).toString() : "?")
+              .append(" ");
+        }
+        return sb.append(")").toString();
+    }
   }
   
 }

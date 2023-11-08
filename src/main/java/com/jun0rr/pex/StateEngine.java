@@ -21,7 +21,7 @@ public class StateEngine {
   public static final Predicate<String> VALUE_PART = Pattern.compile("[0-9]+\\.?([0-9]+)?").asMatchPredicate();
   
   public static enum State {
-    VARIABLE, VALUE, OPERATION, OPERATION_PART, BRACKET_OPEN, BRACKET_CLOSE, BLANK;
+    VARIABLE, VALUE, OPERATION, OPERATION2, OPERATION_PART, BRACKET_OPEN, BRACKET_CLOSE, BLANK;
   }
   
   private final List<Operation> ops;
@@ -29,6 +29,8 @@ public class StateEngine {
   private final List<StateObserver> observers;
   
   private final StringBuilder builder;
+  
+  private final StringBuilder var;
   
   private String value;
   
@@ -40,6 +42,7 @@ public class StateEngine {
     this.ops = Objects.requireNonNull(ops);
     this.observers = new LinkedList<>();
     this.builder = new StringBuilder();
+    this.var = new StringBuilder();
     this.value  =  null;
     this.newState = null;
     this.oldState = null;
@@ -112,6 +115,7 @@ public class StateEngine {
   public StateEngine clear() {
     newState = oldState = null;
     clearValue();
+    var.delete(0, var.length());
     return this;
   }
   
@@ -134,6 +138,76 @@ public class StateEngine {
   }
   
   public StateEngine update(char c) {
+    String part = builder.toString();
+    oldState = newState;
+    if(isBlank(c)) {
+      newState = State.BLANK;
+      clearValue();
+    }
+    else if(isOpenBracket(c)) {
+      newState = State.BRACKET_OPEN;
+      clearValue();
+    }
+    else if(isCloseBracket(c)) {
+      newState = State.BRACKET_CLOSE;
+      clearValue();
+    }
+    else if(isValuePart(part + c)) {
+      newState = State.VALUE;
+      builder.append(c);
+    }
+    else if(isCompleteOperation(part + c)) {
+      newState = State.OPERATION;
+      if(oldState == State.VARIABLE) {
+        oldState = State.OPERATION_PART;
+      }
+      builder.append(c);
+    }
+    else {
+      if(isValuePart(c)) {
+        newState = State.VALUE;
+        clearValue();
+        builder.append(c);
+      }
+      else if(isCompleteOperation(String.valueOf(c))) {
+        clearValue();
+        builder.append(c);
+        newState = oldState == State.OPERATION ? State.OPERATION2 : State.OPERATION;
+      }
+      else {
+        if(oldState != State.VARIABLE) {
+          clearValue();
+        }
+        builder.append(c);
+        newState = State.VARIABLE;
+      }
+    }
+    //System.out.println(this);
+    if(isStateChanged()) {
+      switch(state()) {
+        case BRACKET_OPEN:
+          observers.forEach(o->o.bracketOpen(this));
+          break;
+        case BRACKET_CLOSE:
+          observers.forEach(o->o.bracketClose(this));
+          break;
+        case OPERATION:
+        case OPERATION2:
+          observers.forEach(o->o.operation(this));
+          break;
+        case VALUE:
+          observers.forEach(o->o.value(this));
+          break;
+        case VARIABLE:
+          observers.forEach(o->o.variable(this));
+          break;
+        default: break;
+      }
+    }
+    return this;
+  }
+  
+  public StateEngine update2(char c) {
     String part = builder.toString();
     oldState = newState;
     if(isBlank(c)) {

@@ -15,23 +15,9 @@ public class Random extends Operation {
   public static final int PRIORITY = 7000;
   
   public Random() {
-    super("rdm", PRIORITY, PlaceParam.NONE, 1, e->{
-      double a = e.params().get(0).resolve();
-      return Math.random() * a;
+    super("rdm", PRIORITY, PlaceParam.NONE, 0, e->{
+      return Math.random();
     });
   }
 
-  @Override
-  public String toString() {
-    StringBuilder str = new StringBuilder("rdm( ");
-    for(int i = 0; i < params().size(); i++) {
-      str.append(params().get(i)).append(", ");
-    }
-    if(str.toString().endsWith(", ")) {
-      str.delete(str.length() -2, str.length() -1);
-    }
-    str.append(")");
-    return str.toString();
-  }
-  
 }

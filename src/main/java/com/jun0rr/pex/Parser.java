@@ -5,6 +5,7 @@
 package com.jun0rr.pex;
 
 import com.jun0rr.indexed.Indexed;
+import com.jun0rr.pex.main.StringPad;
 import com.jun0rr.pex.ops.Ceil;
 import com.jun0rr.pex.ops.Divide;
 import com.jun0rr.pex.ops.Equals;
@@ -50,6 +51,8 @@ public class Parser implements StateObserver {
   
   private int priority;
   
+  private boolean showstack;
+  
   public Parser() {
     variables = new TreeMap();
     stack = new LinkedList<>();
@@ -75,8 +78,18 @@ public class Parser implements StateObserver {
     ops.add(new Round());
     engine = new StateEngine(ops);
     this.priority = START_PRIORITY;
+    this.showstack = false;
     engine.addObserver(this);
     variables.put("pi", Value.of(3.14159265359));
+  }
+  
+  public Parser setShowStack(boolean show) {
+    showstack = show;
+    return this;
+  }
+  
+  public boolean isShowStack() {
+    return showstack;
   }
   
   public Parser addOperation(Operation o) {
@@ -133,18 +146,30 @@ public class Parser implements StateObserver {
   public Expression parse(String s) {
     stack.clear();
     engine.clear();
-    System.out.printf("  -> Stack.size=%d%n", stack.size());
     priority = START_PRIORITY;
     for(int i = 0; i < s.length(); i++) {
       engine.update(s.charAt(i));
-      //System.out.println(engine.update(s.charAt(i)));
       priority--;
     }
     engine.finish();
-    System.out.printf("  -> Stack.size=%d%n", stack.size());
-    stack.forEach(e->System.out.printf("  -> %s\t%d%n", e, e.priority()));
+    if(showstack) {
+      System.out.printf("%s%n", StringPad.of(String.format("[ stack.size: %d ]", stack.size())).cpad("=", 41));
+      System.out.printf("  %s %s %s%n", 
+          StringPad.of("Expression").rpad(" ", 14), 
+          StringPad.of("Type").rpad(" ", 11), 
+          StringPad.of("Priority").lpad(" ", 10));
+      System.out.printf("  %s %s %s%n", 
+          StringPad.of("-").rpad("-", 14), 
+          StringPad.of("-").rpad("-", 11), 
+          StringPad.of("-").lpad("-", 10));
+      stack.stream()
+          .peek(e->System.out.printf("  %s",  StringPad.of(e.toString().concat(" ")).rpad("_", 14)))
+          .peek(e->System.out.printf("%s",  StringPad.of(String.format(" %s ", e.getClass().getSimpleName())).rpad("_", 12)))
+          .forEach(e->System.out.printf("%s%n", StringPad.of(String.format(" %d", e.priority())).lpad("_", 11)));
+      System.out.printf("%s%n", StringPad.of("=").cpad("=", 41));
+    }
     List<Indexed<Expression>> resolve = stack.stream()
-        .map(Indexed.indexed())
+        .map(Indexed.builder())
         .filter(i->i.value().isOperation())
         .filter(i->i.value().arity() > 0)
         .sorted(this::descPriority)
@@ -177,35 +202,42 @@ public class Parser implements StateObserver {
 
   @Override
   public void bracketOpen(StateEngine e) {
-    System.out.println(">>> bracketOpen: " + e);
+    //System.out.println(">>> bracketOpen: " + e);
+    priority--;
     priority += BRACKET_PRIORITY;
   }
 
   @Override
   public void bracketClose(StateEngine e) {
-    System.out.println(">>> bracketClose: " + e);
+    //System.out.println(">>> bracketClose: " + e);
+    priority--;
     priority -= BRACKET_PRIORITY;
   }
 
   @Override
   public void operation(StateEngine e) {
-    System.out.println(">>> operation: " + e);
+    //System.out.println(">>> operation: " + e);
+    priority--;
     Operation op = ops.stream()
         .filter(o->o.token().equalsIgnoreCase(engine.value()))
-        .findFirst().get().reset();
+        .findFirst()
+        .get()
+        .clone();
     op.addPriority(priority);
     stack.add(op);
   }
 
   @Override
   public void value(StateEngine e) {
-    System.out.println(">>> value: " + e);
+    //System.out.println(">>> value: " + e);
+    priority--;
     stack.add(Value.of(engine.value()).priority(priority));
   }
 
   @Override
   public void variable(StateEngine e) {
-    System.out.println(">>> variable: " + e);
+    //System.out.println(">>> variable: " + e);
+    priority--;
     stack.add(new Variable(
         engine.value(), variables
     ).priority(priority));
