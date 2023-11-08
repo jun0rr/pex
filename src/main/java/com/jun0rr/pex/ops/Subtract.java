@@ -18,6 +18,7 @@ public class Subtract extends Operation {
     super("-", PRIORITY, PlaceParam.BOTH, 2, e->{
       double a = e.params().get(0).resolve();
       double b = e.params().get(1).resolve();
+      //System.out.printf("[DEBUG] Subtract: a=%s, b=%s%n", a, b);
       return a - b;
     });
   }

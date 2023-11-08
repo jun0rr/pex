@@ -23,15 +23,22 @@ public class Attr extends Operation {
   public Attr(Map<String,Expression> vars) {
     super("=", PRIORITY, PlaceParam.BOTH, 2, e->{
       Attr attr = (Attr) e;
+      System.out.println("-- " + attr + " -- " + attr.hashCode());
       Expression name = attr.params().get(0);
       Expression value = attr.variables.get(name.token());
       if(value == null) {
         value = attr.params().get(1);
       }
       attr.variables.put(name.token(), value);
+      System.out.printf("[DEBUG] Attr: name=%s, value=%s%n", name, value);
       return value.resolve();
     });
     this.variables = Objects.requireNonNull(vars);
+  }
+  
+  @Override
+  public Attr clone() {
+    return new Attr(variables);
   }
 
   @Override

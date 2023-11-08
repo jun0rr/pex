@@ -26,6 +26,8 @@ public class Operation implements Expression {
   
   private final Function<Expression,Double> function;
   
+  private final int initPriority;
+  
   private int priority;
   
   public Operation(String token, int priority, PlaceParam pp, int arity, Function<Expression,Double> fn) {
@@ -33,8 +35,20 @@ public class Operation implements Expression {
     this.function = Objects.requireNonNull(fn);
     this.placeparam = Objects.requireNonNull(pp);
     this.params = new LinkedList<>();
+    this.initPriority = priority;
     this.priority = priority;
     this.arity = arity;
+  }
+  
+  @Override
+  public Operation clone() {
+    return new Operation(token, priority, placeparam, arity, function);
+  }
+  
+  public Operation reset() {
+    params.clear();
+    priority = initPriority;
+    return this;
   }
 
   @Override

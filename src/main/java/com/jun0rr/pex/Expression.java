@@ -10,7 +10,7 @@ import java.util.List;
  *
  * @author F6036477
  */
-public interface Expression extends Comparable<Expression> {
+public interface Expression extends Comparable<Expression>, Cloneable {
   
   public int priority();
   

@@ -4,6 +4,7 @@
  */
 package com.jun0rr.pex;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -19,15 +20,13 @@ public class StateEngine {
   
   public static final Predicate<String> VALUE_PART = Pattern.compile("[0-9]+\\.?([0-9]+)?").asMatchPredicate();
   
-  public static final int BRACKET_PRIORITY = 15000;
-  
-  public static final int START_PRIORITY = 1500;
-  
   public static enum State {
-    VARIABLE, VALUE, OPERATION, OPERATION_PART, BRACKET_OPEN, BRACKET_CLOSE, BLANK, FINISH;
+    VARIABLE, VALUE, OPERATION, OPERATION_PART, BRACKET_OPEN, BRACKET_CLOSE, BLANK;
   }
   
   private final List<Operation> ops;
+  
+  private final List<StateObserver> observers;
   
   private final StringBuilder builder;
   
@@ -37,25 +36,29 @@ public class StateEngine {
   
   private State newState;
   
-  private int priority;
-  
   public StateEngine(List<Operation> ops) {
     this.ops = Objects.requireNonNull(ops);
+    this.observers = new LinkedList<>();
     this.builder = new StringBuilder();
     this.value  =  null;
     this.newState = null;
     this.oldState = null;
-    this.priority = START_PRIORITY;
+  }
+  
+  public StateEngine addObserver(StateObserver o) {
+    this.observers.add(Objects.requireNonNull(o));
+    return this;
+  }
+  
+  public List<StateObserver> observers() {
+    return observers;
   }
   
   public boolean isStateChanged() {
-    return newState == State.FINISH
-        || (oldState != null
+    return oldState != null
         && oldState != newState
         && oldState != State.BLANK
-        && oldState != State.BRACKET_CLOSE
-        && oldState != State.BRACKET_OPEN
-        && oldState != State.OPERATION_PART);
+        && oldState != State.OPERATION_PART;
   }
   
   public boolean isValuePart(String s) {
@@ -108,13 +111,12 @@ public class StateEngine {
   
   public StateEngine clear() {
     newState = oldState = null;
-    priority = START_PRIORITY;
     clearValue();
     return this;
   }
   
   private StateEngine clearValue() {
-    value  = builder.toString();
+    value = builder.toString();
     builder.delete(0, builder.length());
     return this;
   }
@@ -127,33 +129,19 @@ public class StateEngine {
     return value;
   }
   
-  public int priority() {
-    return priority;
-  }
-  
   public StateEngine finish() {
-    return update('|');
+    return update(' ');
   }
   
   public StateEngine update(char c) {
     String part = builder.toString();
-    State prev = oldState;
     oldState = newState;
-    if(oldState == State.BRACKET_CLOSE) {
-      priority -= BRACKET_PRIORITY;
-      //System.out.printf("isStateChanged() && oldState == State.BRACKET_CLOSE && priority=%d%n", priority);
-    }
-    if(isFinish(c)) {
-      oldState = prev;
-      newState = State.FINISH;
-    }
-    else if(isBlank(c)) {
+    if(isBlank(c)) {
       newState = State.BLANK;
       clearValue();
     }
     else if(isOpenBracket(c)) {
       newState = State.BRACKET_OPEN;
-      priority += BRACKET_PRIORITY;
       clearValue();
     }
     else if(isCloseBracket(c)) {
@@ -171,7 +159,10 @@ public class StateEngine {
         newState = State.OPERATION;
       }
     }
-    else if(newState != State.FINISH) {
+    else {
+      if(!part.isEmpty() && oldState == State.OPERATION_PART) {
+        oldState = State.VARIABLE;
+      }
       if(isValuePart(c)) {
         clearValue();
         builder.append(c);
@@ -193,14 +184,33 @@ public class StateEngine {
         newState = State.VARIABLE;
       }
     }
-    priority--;
-    //System.out.printf("[DEBUG] isStateChanged()=%s, oldState=%s%n", isStateChanged(), oldState);
+    System.out.println(this);
+    if(isStateChanged()) {
+      switch(state()) {
+        case BRACKET_OPEN:
+          observers.forEach(o->o.bracketOpen(this));
+          break;
+        case BRACKET_CLOSE:
+          observers.forEach(o->o.bracketClose(this));
+          break;
+        case OPERATION:
+          observers.forEach(o->o.operation(this));
+          break;
+        case VALUE:
+          observers.forEach(o->o.value(this));
+          break;
+        case VARIABLE:
+          observers.forEach(o->o.variable(this));
+          break;
+        default: break;
+      }
+    }
     return this;
   }
   
   @Override
   public String toString() {
-    return "StateEngine{" + "builder=" + builder + ", oldState=" + oldState + ", newState=" + newState + ", priority=" + priority + '}';
+    return "StateEngine{isStateChanged=" + isStateChanged() + ", builder=" + builder + ", value=" + value + ", oldState=" + oldState + ", newState=" + newState + '}';
   }
   
 }

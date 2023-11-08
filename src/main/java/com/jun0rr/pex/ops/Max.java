@@ -18,6 +18,7 @@ public class Max extends Operation {
     super("max", PRIORITY, PlaceParam.RIGHT, 2, e->{
       double a = e.params().get(0).resolve();
       double b = e.params().get(1).resolve();
+      //System.out.printf("[DEBUG] Max: a=%s, b=%s%n", a, b);
       return Math.max(a, b);
     });
   }
@@ -29,7 +30,7 @@ public class Max extends Operation {
       str.append(params().get(i)).append(", ");
     }
     if(str.toString().endsWith(", ")) {
-      str.delete(str.length() -2, str.length());
+      str.delete(str.length() -2, str.length() -1);
     }
     str.append(")");
     return str.toString();

@@ -62,17 +62,18 @@ public class TestStateEngine {
   
   @Test public void test() {
     StateEngine eng = new StateEngine(ops);
-    String sx = "(10+10 - max 1 5) * xyz";
+    //String sx = "(10+10 - max 1 5) * xyz";
+    String sx = "x=(10+10-max 1 5*2)";
     for(int i = 0; i < sx.length(); i++) {
       eng.update(sx.charAt(i));
       System.out.printf("  -> %s%n", eng.toString());
       if(eng.isStateChanged()) {
-        System.out.printf(">>> state=%s, value=%s, priority=%d%n", eng.state(), eng.value(), eng.priority());
+        System.out.printf(">>> state=%s, value=%s, priority=%n", eng.state(), eng.value());
       }
     }
     eng.finish();
     if(eng.isStateChanged()) {
-      System.out.printf(">>> state=%s, value=%s, priority=%d%n", eng.state(), eng.value(), eng.priority());
+      System.out.printf(">>> state=%s, value=%s, priority=%n", eng.state(), eng.value());
     }
   }
   

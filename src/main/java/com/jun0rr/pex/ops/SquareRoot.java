@@ -28,7 +28,7 @@ public class SquareRoot extends Operation {
       str.append(params().get(i)).append(", ");
     }
     if(str.toString().endsWith(", ")) {
-      str.delete(str.length() -2, str.length());
+      str.delete(str.length() -2, str.length() -1);
     }
     str.append(")");
     return str.toString();
