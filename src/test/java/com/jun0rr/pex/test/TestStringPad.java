@@ -13,11 +13,16 @@ import org.junit.jupiter.api.Test;
  */
 public class TestStringPad {
   
-  @Test public void test() {
+  @Test public void test1() {
     StringPad pad = new StringPad("hello world");
     System.out.printf("lpad='%s'%n", pad.lpad(" ", 30));
     System.out.printf("cpad='%s'%n", pad.cpad(" ", 30));
     System.out.printf("rpad='%s'%n", pad.rpad(" ", 30));
+  }
+  
+  
+  @Test public void test2() {
+    System.out.println(StringPad.of("hello world").cpad("-", 8));
   }
   
 }

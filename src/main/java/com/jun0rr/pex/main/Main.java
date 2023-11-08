@@ -6,6 +6,7 @@ package com.jun0rr.pex.main;
 
 import com.jun0rr.pex.Expression;
 import com.jun0rr.pex.Parser;
+import com.jun0rr.pex.main.StringColumn.Align;
 import java.util.List;
 import java.util.Scanner;
 
@@ -32,13 +33,24 @@ public class Main {
         String line = scanner.nextLine();
         switch(line) {
           case "vars":
-            System.out.printf("%s%n", StringPad.of(String.format("[ Variables: %d ]", parser.variables().size())).cpad("=", 74));
-            System.out.printf("  %s %s%n", StringPad.of("Name").rpad(" ", 9), StringPad.of("Value").lpad(" ", 60));
-            System.out.printf("  %s %s%n", StringPad.of("-").rpad("-", 9), StringPad.of("-").lpad("-", 60));
+            StringTable table = new StringTable(String.format("Variables: %d", parser.variables().size()), Align.CENTER, '=', '-');
+            StringRow header = new StringRow()
+                .addColumn("Name", 12, Align.LEFT, '|')
+                .addColumn("Value", 48, Align.RIGHT, '|');
+            table.addRow(header);
             parser.variables().entrySet().stream()
-                .peek(e->System.out.printf("  %s", StringPad.of(e.getKey().concat(" ")).rpad("_", 10)))
-                .forEach(e->System.out.printf("%s%n", StringPad.of(String.format(" %s", e.getValue())).lpad("_", 60)));
-            System.out.printf("%s%n", StringPad.of(String.format("=", parser.variables().size())).cpad("=", 74));
+                .map(e->new StringRow()
+                    .addColumn(e.getKey(), 12, Align.LEFT, '|')
+                    .addColumn(e.getValue().toString(), 48, Align.RIGHT, '|'))
+                .forEach(table::addRow);
+            System.out.println(table);
+            //System.out.printf("%s%n", StringPad.of(String.format("[ Variables: %d ]", parser.variables().size())).cpad("=", 74));
+            //System.out.printf("  %s %s%n", StringPad.of("Name").rpad(" ", 9), StringPad.of("Value").lpad(" ", 60));
+            //System.out.printf("  %s %s%n", StringPad.of("-").rpad("-", 9), StringPad.of("-").lpad("-", 60));
+            //parser.variables().entrySet().stream()
+                //.peek(e->System.out.printf("  %s", StringPad.of(e.getKey().concat(" ")).rpad("_", 10)))
+                //.forEach(e->System.out.printf("%s%n", StringPad.of(String.format(" %s", e.getValue())).lpad("_", 60)));
+            //System.out.printf("%s%n", StringPad.of(String.format("=", parser.variables().size())).cpad("=", 74));
             break;
           case "exit":
             System.out.printf("[JPex]> bye!%n");
@@ -47,6 +59,11 @@ public class Main {
           case "stack":
             parser.setShowStack(!parser.isShowStack());
             System.out.printf("[JPex]> set show stack: %s%n", parser.isShowStack());
+            break;
+          case "rmvar":
+            System.out.printf("[JPex]> variable name: ");
+            line = scanner.nextLine();
+            parser.variables().remove(line);
             break;
           default:
             Expression e = parser.parse(line);

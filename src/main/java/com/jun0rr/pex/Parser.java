@@ -5,7 +5,10 @@
 package com.jun0rr.pex;
 
 import com.jun0rr.indexed.Indexed;
+import com.jun0rr.pex.main.StringColumn.Align;
 import com.jun0rr.pex.main.StringPad;
+import com.jun0rr.pex.main.StringRow;
+import com.jun0rr.pex.main.StringTable;
 import com.jun0rr.pex.ops.Ceil;
 import com.jun0rr.pex.ops.Divide;
 import com.jun0rr.pex.ops.Equals;
@@ -153,20 +156,7 @@ public class Parser implements StateObserver {
     }
     engine.finish();
     if(showstack) {
-      System.out.printf("%s%n", StringPad.of(String.format("[ stack.size: %d ]", stack.size())).cpad("=", 41));
-      System.out.printf("  %s %s %s%n", 
-          StringPad.of("Expression").rpad(" ", 14), 
-          StringPad.of("Type").rpad(" ", 11), 
-          StringPad.of("Priority").lpad(" ", 10));
-      System.out.printf("  %s %s %s%n", 
-          StringPad.of("-").rpad("-", 14), 
-          StringPad.of("-").rpad("-", 11), 
-          StringPad.of("-").lpad("-", 10));
-      stack.stream()
-          .peek(e->System.out.printf("  %s",  StringPad.of(e.toString().concat(" ")).rpad("_", 14)))
-          .peek(e->System.out.printf("%s",  StringPad.of(String.format(" %s ", e.getClass().getSimpleName())).rpad("_", 12)))
-          .forEach(e->System.out.printf("%s%n", StringPad.of(String.format(" %d", e.priority())).lpad("_", 11)));
-      System.out.printf("%s%n", StringPad.of("=").cpad("=", 41));
+      printStack();
     }
     List<Indexed<Expression>> resolve = stack.stream()
         .map(Indexed.builder())
@@ -198,6 +188,22 @@ public class Parser implements StateObserver {
       }
     }
     return stack.get(nextValidExp(-1));
+  }
+  
+  private void printStack() {
+    StringTable table  = new StringTable(String.format("Stack.size: %d", stack.size()), Align.CENTER, '=', '-');
+    StringRow header = new StringRow()
+        .addColumn("Expression", 38, Align.LEFT, '|')
+        .addColumn("Type", 12, Align.CENTER, '|')
+        .addColumn("Priority", 10, Align.RIGHT, '|');
+    table.addRow(header);
+    stack.stream()
+        .map(e->new StringRow()
+            .addColumn(e.toString(), 38, Align.LEFT, '|')
+            .addColumn(e.getClass().getSimpleName(), 12, Align.CENTER, '|')
+            .addColumn(String.valueOf(e.priority()), 10, Align.RIGHT, '|'))
+        .forEach(table::addRow);
+    System.out.println(table);
   }
 
   @Override
