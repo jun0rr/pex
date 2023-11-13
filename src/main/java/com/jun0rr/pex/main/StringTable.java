@@ -41,8 +41,8 @@ public class StringTable {
     return rows;
   }
   
-  public StringRow newRow() {
-    StringRow row = new StringRow();
+  public StringRow newRow(char colsep) {
+    StringRow row = new StringRow(colsep);
     rows.add(row);
     return row;
   }

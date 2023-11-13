@@ -22,23 +22,20 @@ public class StringColumn {
   
   private final Align align;
   
-  private final char colsep;
-  
   private final String formatted;
   
-  public StringColumn(String value, int lenght, Align align, char colsep) {
+  public StringColumn(String value, int lenght, Align align) {
     this.value = Objects.requireNonNull(value);
     this.lenght = lenght;
     this.align = Objects.requireNonNull(align);
-    this.colsep = colsep;
     StringPad pad = StringPad.of(String.format(" %s ", 
-        value.length() > lenght 
+        value.length() > lenght -2 
             ? value.substring(0, lenght -2) : value)
     );
     this.formatted = switch(align) {
-      case LEFT -> pad.rpad(" ", lenght).concat(String.valueOf(colsep));
-      case CENTER -> pad.cpad(" ", lenght).concat(String.valueOf(colsep));
-      case RIGHT -> pad.lpad(" ", lenght).concat(String.valueOf(colsep));
+      case LEFT -> pad.rpad(" ", lenght);
+      case CENTER -> pad.cpad(" ", lenght);
+      case RIGHT -> pad.lpad(" ", lenght);
       default -> throw new IllegalStateException("Bad column alignment: " + align);
     };
   }
@@ -55,10 +52,6 @@ public class StringColumn {
     return align;
   }
   
-  public char colSeparator() {
-    return colsep;
-  }
-  
   public String format() {
     return formatted;
   }
@@ -69,7 +62,6 @@ public class StringColumn {
     hash = 83 * hash + this.lenght;
     hash = 83 * hash + Objects.hashCode(this.value);
     hash = 83 * hash + Objects.hashCode(this.align);
-    hash = 83 * hash + this.colsep;
     hash = 83 * hash + Objects.hashCode(this.formatted);
     return hash;
   }
@@ -87,9 +79,6 @@ public class StringColumn {
     }
     final StringColumn other = (StringColumn) obj;
     if (this.lenght != other.lenght) {
-      return false;
-    }
-    if (this.colsep != other.colsep) {
       return false;
     }
     if (!Objects.equals(this.value, other.value)) {

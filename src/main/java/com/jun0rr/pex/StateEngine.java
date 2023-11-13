@@ -6,6 +6,7 @@ package com.jun0rr.pex;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -26,6 +27,8 @@ public class StateEngine {
   
   private final List<Operation> ops;
   
+  //private final Map<String,Expression> vars;
+  
   private final List<StateObserver> observers;
   
   private final StringBuilder builder;
@@ -40,6 +43,7 @@ public class StateEngine {
   
   public StateEngine(List<Operation> ops) {
     this.ops = Objects.requireNonNull(ops);
+    //this.vars = Objects.requireNonNull(vars);
     this.observers = new LinkedList<>();
     this.builder = new StringBuilder();
     this.var = new StringBuilder();
@@ -87,6 +91,22 @@ public class StateEngine {
   public boolean isOperationPart(char c) {
     return isOperationPart(String.valueOf(c));
   }
+  
+  //public boolean isVariablePart(String s) {
+    //return s.length() > 0 && vars.keySet().stream().anyMatch(v->v.startsWith(s));
+  //}
+  
+  //public boolean isVariablePart(char c) {
+    //return isVariablePart(String.valueOf(c));
+  //}
+  
+  //public boolean isCompleteVariable(String s) {
+    //return s.length() > 0 && vars.keySet().stream().anyMatch(v->v.equalsIgnoreCase(s));
+  //}
+  
+  //public boolean isCompleteVariable(char c) {
+    //return isCompleteVariable(String.valueOf(c));
+  //}
   
   public boolean isOpenBracket(char c) {
     return '(' == c;

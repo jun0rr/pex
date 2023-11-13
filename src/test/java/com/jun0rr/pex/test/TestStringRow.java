@@ -17,10 +17,10 @@ public class TestStringRow {
   
   
   @Test public void test() {
-    StringRow row = new StringRow();
-    row.addColumn(new StringColumn("hello", 10, Align.LEFT, '|'))
-        .addColumn(new StringColumn("world", 15, Align.CENTER, '|'))
-        .addColumn(String.valueOf(Math.random()*10000), 20, Align.RIGHT, '|');
+    StringRow row = new StringRow('|');
+    row.addColumn(new StringColumn("hello", 10, Align.LEFT))
+        .addColumn(new StringColumn("world", 15, Align.CENTER))
+        .addColumn(String.valueOf(Math.random()*10000), 20, Align.RIGHT);
     System.out.println(row);
   }
   

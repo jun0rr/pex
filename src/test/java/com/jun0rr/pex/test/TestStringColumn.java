@@ -15,7 +15,7 @@ public class TestStringColumn {
   
   
   @Test public void test() {
-    System.out.println(new StringColumn("hello world", 10, StringColumn.Align.RIGHT, '|'));
+    System.out.println(new StringColumn("hello world", 10, StringColumn.Align.RIGHT));
   }
   
 }

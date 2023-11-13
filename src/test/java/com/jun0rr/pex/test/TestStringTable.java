@@ -17,14 +17,14 @@ import org.junit.jupiter.api.Test;
 public class TestStringTable {
   
   @Test public void test() {
-    StringRow row = new StringRow();
-    row.addColumn("hello", 10, StringColumn.Align.LEFT, '|')
-        .addColumn("world", 15, StringColumn.Align.CENTER, '|')
-        .addColumn(String.valueOf(Math.random()*10000+1), 20, Align.RIGHT, '|');
-    StringRow header = new StringRow();
-    header.addColumn("Name", 10, Align.LEFT, '|')
-        .addColumn("Attr", 15, Align.CENTER, '|')
-        .addColumn("Value", 20, Align.RIGHT, '|');
+    StringRow row = new StringRow('|');
+    row.addColumn("hello", 10, StringColumn.Align.LEFT)
+        .addColumn("world", 15, StringColumn.Align.CENTER)
+        .addColumn(String.valueOf(Math.random()*10000+1), 20, Align.RIGHT);
+    StringRow header = new StringRow('|');
+    header.addColumn("Name", 10, Align.LEFT)
+        .addColumn("Attr", 15, Align.CENTER)
+        .addColumn("Value", 20, Align.RIGHT);
     StringTable table = new StringTable("Hello World", Align.CENTER, '=', '-');
     table.addRow(header)
         .addRow(row)

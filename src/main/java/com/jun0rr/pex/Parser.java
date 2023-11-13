@@ -192,16 +192,16 @@ public class Parser implements StateObserver {
   
   private void printStack() {
     StringTable table  = new StringTable(String.format("Stack.size: %d", stack.size()), Align.CENTER, '=', '-');
-    StringRow header = new StringRow()
-        .addColumn("Expression", 38, Align.LEFT, '|')
-        .addColumn("Type", 12, Align.CENTER, '|')
-        .addColumn("Priority", 10, Align.RIGHT, '|');
+    StringRow header = new StringRow('|')
+        .addColumn("Expression", 38, Align.LEFT)
+        .addColumn("Type", 12, Align.CENTER)
+        .addColumn("Priority", 10, Align.RIGHT);
     table.addRow(header);
     stack.stream()
-        .map(e->new StringRow()
-            .addColumn(e.toString(), 38, Align.LEFT, '|')
-            .addColumn(e.getClass().getSimpleName(), 12, Align.CENTER, '|')
-            .addColumn(String.valueOf(e.priority()), 10, Align.RIGHT, '|'))
+        .map(e->new StringRow('|')
+            .addColumn(e.toString(), 38, Align.LEFT)
+            .addColumn(e.getClass().getSimpleName(), 12, Align.CENTER)
+            .addColumn(String.valueOf(e.priority()), 10, Align.RIGHT))
         .forEach(table::addRow);
     System.out.println(table);
   }

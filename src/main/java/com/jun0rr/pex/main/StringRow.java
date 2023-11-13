@@ -17,8 +17,15 @@ public class StringRow {
   
   private final List<StringColumn> cols;
   
-  public StringRow() {
+  private final char colsep;
+  
+  public StringRow(char colsep) {
     this.cols = new LinkedList<>();
+    this.colsep = colsep;
+  }
+  
+  public char columnSeparatorChar() {
+    return colsep;
   }
   
   public List<StringColumn> columns() {
@@ -30,8 +37,8 @@ public class StringRow {
     return this;
   }
   
-  public StringRow addColumn(String value, int lenght, Align align, char colsep) {
-    cols.add(new StringColumn(value, lenght, align, colsep));
+  public StringRow addColumn(String value, int lenght, Align align) {
+    cols.add(new StringColumn(value, lenght, align));
     return this;
   }
   
@@ -44,9 +51,8 @@ public class StringRow {
     if(cols.isEmpty()) {
       throw new IllegalStateException("No columns found");
     }
-    StringColumn first = cols.get(0);
-    StringBuilder sb = new StringBuilder(String.valueOf(first.colSeparator()));
-    cols.forEach(c->sb.append(c));
+    StringBuilder sb = new StringBuilder(String.valueOf(colsep));
+    cols.forEach(c->sb.append(c).append(colsep));
     return sb.toString();
   }
   
